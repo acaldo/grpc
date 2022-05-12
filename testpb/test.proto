@@ -5,7 +5,7 @@ package test;
 option go_package = "github.com/acaldo/grpc;testpb";
 
 message Test{
-    string id =1 ;
+    string id = 1 ;
     string name = 2;
 }
 
@@ -15,6 +15,7 @@ message GetTestRequest{
 
 message SetTestResponse{
     string id = 1;
+    string name = 2;
 }
 
 service TestService{
