@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package test;
+
+option go_package = "github.com/acaldo/grpc;testpb";
+
+message Test{
+    string id =1 ;
+    string name = 2;
+}
+
+message GetTestRequest{
+    string id = 1;
+}
+
+message SetTestResponse{
+    string id = 1;
+}
+
+service TestService{
+    rpc GetTest(GetTestRequest) returns (Test); 
+    rpc SetTest(Test) returns (SetTestResponse); 
+}
