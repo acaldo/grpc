@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"io"
+	"time"
 
 	"github.com/acaldo/grpc/models"
 	"github.com/acaldo/grpc/repository"
+	"github.com/acaldo/grpc/studentpb"
 	"github.com/acaldo/grpc/testpb"
 )
 
@@ -92,4 +94,24 @@ func (s *TestServer) EnrollStudents(stream testpb.TestService_EnrollStudentsServ
 			})
 		}
 	}
+}
+
+func (s *TestServer) GetStudentsPerTest(req *testpb.GetStudentsPerTestRequest, stream testpb.TestService_GetStudentsPerTestServer) error {
+	students, err := s.repo.GetStudentsPerTest(context.Background(), req.GetTestId())
+	if err != nil {
+		return err
+	}
+	for _, student := range students {
+		student := &studentpb.Student{
+			Id:   student.Id,
+			Name: student.Name,
+			Age:  student.Age,
+		}
+		err := stream.Send(student)
+		time.Sleep(2 - time.Second)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
