@@ -76,3 +76,8 @@ func (repo *PostgresRepository) GetTest(ctx context.Context, id string) (*models
 	return &test, nil
 
 }
+
+func (repo *PostgresRepository) SetQuestion(ctx context.Context, question *models.Question) error {
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO questions (id, answer,question,test_id) VALUES ($1, $2, $3, $4)", question.Id, question.Answer, question.Question, question.TestId)
+	return err
+}
