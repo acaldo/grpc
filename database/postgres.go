@@ -50,7 +50,7 @@ func (repo *PostgresRepository) SetStudent(ctx context.Context, student *models.
 }
 
 func (repo *PostgresRepository) SetTest(ctx context.Context, test *models.Test) error {
-	_, err := repo.db.ExecContext(ctx, "INSERT INTO tests (id, name) VALUES ($1, $2", test.Id, test.Name)
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO tests (id, name) VALUES ($1, $2)", test.Id, test.Name)
 	return err
 }
 
