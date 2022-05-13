@@ -32,5 +32,5 @@ message SetQuestionResponse{
 service TestService{
     rpc GetTest(GetTestRequest) returns (Test); 
     rpc SetTest(Test) returns (SetTestResponse); 
-    rpc SetQuestions(stream Question) returns (SetQuestionResponse)
+    rpc SetQuestions(stream Question) returns (SetQuestionResponse);
 }
