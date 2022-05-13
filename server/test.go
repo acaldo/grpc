@@ -69,3 +69,27 @@ func (s *TestServer) SetQuestions(stream testpb.TestService_SetQuestionsServer) 
 		}
 	}
 }
+
+func (s *TestServer) EnrollStudents(stream testpb.TestService_EnrollStudentsServer) error {
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: true,
+			})
+		}
+		if err != nil {
+			return err
+		}
+		enrollment := &models.Enrollment{
+			StudentId: msg.GetStudentId(),
+			TestId:    msg.GetTestId(),
+		}
+		err = s.repo.SetEnrollment(context.Background(), enrollment)
+		if err != nil {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: false,
+			})
+		}
+	}
+}
