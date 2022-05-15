@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"time"
 
@@ -18,8 +19,10 @@ func main() {
 
 	client := testpb.NewTestServiceClient(conn)
 
-	DoUnary(client)
-	DoClientStreaming(client)
+	//DoUnary(client)
+	//DoClientStreaming(client)
+	//DoServerStreaming(client)
+	DoBidirectionalStreaming(client)
 
 }
 
@@ -69,4 +72,65 @@ func DoClientStreaming(client testpb.TestServiceClient) {
 		log.Fatalf("error while receiving response: %v", err)
 	}
 	log.Printf("response from SetQuestions: %v", res)
+}
+
+func DoServerStreaming(client testpb.TestServiceClient) {
+	req := &testpb.GetStudentsPerTestRequest{
+		TestId: "t1",
+	}
+
+	stream, err := client.GetStudentsPerTest(context.Background(), req)
+	if err != nil {
+		log.Fatalf("error while calling GetStudentsPerTest: %v", err)
+	}
+
+	for {
+		student, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("error while reading stream: %v", err)
+		}
+		log.Printf("student: %v", student)
+	}
+}
+
+func DoBidirectionalStreaming(client testpb.TestServiceClient) {
+	answer := testpb.TakeTestRequest{
+		Answer: "42",
+	}
+
+	numberOfQuestions := 4
+
+	waitChannel := make(chan struct{})
+
+	stream, err := client.TakeTest(context.Background())
+	if err != nil {
+		log.Fatalf("error while calling TakeTest: %v", err)
+	}
+
+	go func() {
+		for i := 0; i < numberOfQuestions; i++ {
+			stream.Send(&answer)
+			time.Sleep(1 * time.Second)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("error while reading stream: %v", err)
+				break
+			}
+			log.Printf("response from TakeTest: %v", res)
+		}
+		close(waitChannel)
+	}()
+	<-waitChannel
 }
